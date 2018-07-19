@@ -1,7 +1,6 @@
 package du
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -11,18 +10,17 @@ import (
 
 // PathStatus for du status
 type PathStatus struct {
-	Name    string `json:"name"`
-	Size    uint64 `json:"size"`
-	PathNum uint64 `json:"pathnum"`
-	FileNum uint64 `json:"filenum"`
+	Name    string   `json:"name"`
+	Size    ByteSize `json:"size"`
+	PathNum uint64   `json:"pathnum"`
+	FileNum uint64   `json:"filenum"`
 }
 
 func (p PathStatus) String() string {
-	buf, err := json.Marshal(p)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(buf)
+	retStr := ""
+	retStr += fmt.Sprintf("{\"name\":\"%v\",\"size\":\"%s\",", p.Name, p.Size)
+	retStr += fmt.Sprintf("\"pathnum\":%v,\"filenum\":%v}", p.PathNum, p.FileNum)
+	return retStr
 }
 
 // Result of Du()
@@ -64,9 +62,9 @@ func walkFn(path string, info os.FileInfo, err error) error {
 		Result.PathNum++
 	} else {
 		if info.Size() < int64(BlockSize) {
-			Result.Size += BlockSize
+			Result.Size += ByteSize(BlockSize)
 		} else {
-			Result.Size += uint64(info.Size())
+			Result.Size += ByteSize(info.Size())
 		}
 		Result.FileNum++
 	}
