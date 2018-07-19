@@ -22,16 +22,14 @@ import (
 // duCmd represents the du command
 var duCmd = &cobra.Command{
 	Use:   "du",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "summary the disk usage like linux du cmd",
+	Long: `summary the disk usage like linux du cmd
+supports path and files in one cmd.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Println("du called")
-		// only process one parameter
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
 		du.Du(args)
 	},
 }
