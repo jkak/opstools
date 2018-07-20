@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/jkak/opstools/domain/cmd/tls"
 	"github.com/spf13/cobra"
 )
 
@@ -24,10 +25,7 @@ var httpsCmd = &cobra.Command{
 	Short: "check the expire time for https",
 	Long:  "check the expire time for https of given domains",
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Println("https called")
-		if len(args) == 0 {
-			cmd.Help()
-		}
+		tls.Check(gapDays, domains)
 	},
 }
 
