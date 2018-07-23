@@ -30,7 +30,7 @@ const (
 
 func (p PathStatus) String() string {
 	retStr := ""
-	retStr += fmt.Sprintf("{\"name\":\"%v\",\"size\":\"%.2f\",", p.Name, p.Size)
+	retStr += fmt.Sprintf("{\"name\":\"%v\",\"size\":%.2f,", p.Name, p.Size)
 	retStr += fmt.Sprintf("\"unit\":%v,\"pathnum\":%v,\"filenum\":%v}", p.Unit, p.PathNum, p.FileNum)
 	return retStr
 }
@@ -115,13 +115,13 @@ func updateUnit(p *PathStatus) {
 	switch {
 	case p.Size < KB:
 		p.Unit = "B"
-	case p.Size < 8*MB:
+	case p.Size < MB:
 		p.Unit = "KB"
 		p.Size /= KB
-	case p.Size < 8*GB:
+	case p.Size < GB:
 		p.Unit = "MB"
 		p.Size /= MB
-	case p.Size < 8*TB:
+	case p.Size < TB:
 		p.Unit = "GB"
 		p.Size /= GB
 	default:
