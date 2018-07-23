@@ -9,15 +9,6 @@ import (
 	"syscall"
 )
 
-// PathStatus for du status
-type PathStatus struct {
-	Name    string  `json:"name"`
-	Unit    string  `json:"unit"`
-	Size    float64 `json:"size"`
-	PathNum uint64  `json:"pathnum"`
-	FileNum uint64  `json:"filenum"`
-}
-
 // KB _
 const (
 	_          = iota
@@ -28,16 +19,9 @@ const (
 	PB
 )
 
-func (p PathStatus) String() string {
-	retStr := ""
-	retStr += fmt.Sprintf("{\"name\":\"%v\",\"size\":%.2f,", p.Name, p.Size)
-	retStr += fmt.Sprintf("\"unit\":%v,\"pathnum\":%v,\"filenum\":%v}", p.Unit, p.PathNum, p.FileNum)
-	return retStr
-}
-
 // Result for Dusub()
 var (
-	Result    []PathStatus
+	Result    PathStatus
 	ignores   []string
 	blockSize float64
 	pointer   int64
@@ -58,33 +42,22 @@ func Dusub2(path, ign string) {
 	getBlkSize(path)
 	ignores = strings.Split(ign, ",")
 
-	processSub(path, infos)
-	for _, r := range Result {
-		updateUnit(&r)
-		fmt.Println(r)
+	for _, sub := range infos {
+		processSub(path, sub)
 	}
-
 }
 
-func processSub(path string, infos []os.FileInfo) {
-	// init
-	Result = make([]PathStatus, 0)
-	pointer = -1
-
-OUT_FOR:
-	for _, sub := range infos {
-		// check to ignore the sub path
-		for _, i := range ignores {
-			if sub.Name() == i {
-				continue OUT_FOR
-			}
+func processSub(path string, sub os.FileInfo) {
+	// check to ignore the sub path
+	for _, i := range ignores {
+		if sub.Name() == i {
+			return
 		}
-		r := PathStatus{Name: sub.Name()}
-		Result = append(Result, r)
-		pointer++
-
-		filepath.Walk(filepath.Join(path, sub.Name()), walkFn)
 	}
+	Result.Name = sub.Name()
+	filepath.Walk(filepath.Join(path, sub.Name()), walkFn)
+	Result.updateUnit()
+	fmt.Println(Result)
 }
 
 // update fs block size to BlkSize
@@ -99,33 +72,14 @@ func getBlkSize(p string) {
 
 func walkFn(path string, info os.FileInfo, err error) error {
 	if info.IsDir() {
-		Result[pointer].PathNum++
+		Result.PathNum++
 	} else {
 		if info.Size() < int64(blockSize) {
-			Result[pointer].Size += blockSize
+			Result.Size += blockSize
 		} else {
-			Result[pointer].Size += float64(info.Size())
+			Result.Size += float64(info.Size())
 		}
-		Result[pointer].FileNum++
+		Result.FileNum++
 	}
 	return nil
-}
-
-func updateUnit(p *PathStatus) {
-	switch {
-	case p.Size < KB:
-		p.Unit = "B"
-	case p.Size < MB:
-		p.Unit = "KB"
-		p.Size /= KB
-	case p.Size < GB:
-		p.Unit = "MB"
-		p.Size /= MB
-	case p.Size < TB:
-		p.Unit = "GB"
-		p.Size /= GB
-	default:
-		p.Unit = "TB"
-		p.Size /= TB
-	}
 }
