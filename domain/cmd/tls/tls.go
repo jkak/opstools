@@ -3,7 +3,6 @@ package tls
 import (
 	"crypto/tls"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 )
@@ -23,7 +22,7 @@ type domTime struct {
 }
 
 // Check for tls check
-func Check(days int32, doms string) {
+func Check(days int32, doms []string) {
 	if days <= 0 || len(doms) == 0 {
 		fmt.Println("invalid parameters")
 		return
@@ -36,8 +35,8 @@ func Check(days int32, doms string) {
 	printExpire()
 }
 
-func getExpireTime(doms string) {
-	for _, dom := range strings.Split(doms, ",") {
+func getExpireTime(doms []string) {
+	for _, dom := range doms {
 		wg.Add(1)
 		go getEachTime(dom)
 	}

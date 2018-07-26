@@ -25,19 +25,21 @@ var httpsCmd = &cobra.Command{
 	Short: "check the expire time for https",
 	Long:  "check the expire time for https of given domains",
 	Run: func(cmd *cobra.Command, args []string) {
-		tls.Check(gapDays, domains)
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
+		tls.Check(gapDays, args)
 	},
 }
 
 var (
 	gapDays int32
-	domains string
 )
 
 func init() {
 	rootCmd.AddCommand(httpsCmd)
-	httpsCmd.Flags().StringVarP(&domains, "domain", "d", "baidu.com", "domains like: abc.com,z.cn")
-	httpsCmd.Flags().Int32VarP(&gapDays, "gaps", "g", 60, "default gap of expire days for domain")
+	httpsCmd.Flags().Int32VarP(&gapDays, "day", "d", 60, "expire days for domain check")
 
 	// Here you will define your flags and configuration settings.
 
